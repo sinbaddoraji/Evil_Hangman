@@ -8,8 +8,18 @@ namespace AI
 {
     class Program
     {
+        static Dictionary GameDictionary;
+
         static void Main(string[] args)
         {
+            GameDictionary = new Dictionary();
+
+            foreach (var item in GameDictionary.WordFamilies["oom"].GetWords(4))
+            {
+                Console.WriteLine(item);
+            } 
+
+            Console.ReadKey();
         }
     }
 }
