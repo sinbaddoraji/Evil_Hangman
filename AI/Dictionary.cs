@@ -9,6 +9,9 @@ namespace AI
 {
     public class Dictionary
     {
+        //
+        // The names of wordFamilies
+        //
         private readonly string[] _wordFamilies = new string[]
         {
             "ack", "ad","ail","ain","ake","ale","all","am","ame","an","ank", "ap", "ar", "ash", "at", "ate", "aw", "ay",
@@ -19,37 +22,65 @@ namespace AI
 
              "oat","ock","og", "oil", "oke", "oo", "ood", "oof", "ook", "oom", "ool", "oon", "oop", "oot", "ore", "orn", "ot", "ought", "ould", "ouse", "out", "ow", "own",
 
-             "uck", "ug", "ump"
+             "uck", "ug", "ump", ""
         };
 
+        //
+        // A dictionary object holding a list of all word families and the words they contain
+        //
         public Dictionary<string, WordFamily> WordFamilies = new Dictionary<string, WordFamily>();
 
+        //
+        // string array containing a list of words in the dictionary
+        //
         public string[] WordList;
 
+        //
+        // object for creating random integer values
+        //
+        private Random _randomizer = null;
+
+        //
+        // Return a random word from the Dictionary
+        //
+        public string RandomWord()
+        {
+            if (_randomizer == null) _randomizer = new Random();
+            return WordList[_randomizer.Next(0, WordList.Length)];
+        }
+
+        //
+        // Get Word-Family of a specified word
+        //
+        public string GetWordFamily(string word)
+        {
+            foreach (string wordFamily in _wordFamilies)
+            {
+                if (word.EndsWith(wordFamily)) return wordFamily;
+            }
+
+            return "";
+        }
+
+        //
+        // Dictionary object for word guessing game
+        //
         public Dictionary()
         {
             //Get list of words from word dictionary
             WordList = File.ReadAllLines("dictionary.txt");
 
             //Initalize Word families using the array of common word endings
-            foreach (var wordFamily in _wordFamilies)
+            for (int i = 0; i < _wordFamilies.Length; i++)
             {
-                WordFamily newWordFamily = new WordFamily();
-                WordFamilies.Add(wordFamily, newWordFamily);
+                WordFamilies.Add(_wordFamilies[i], new WordFamily());
             }
 
-            Parallel.ForEach(WordList.AsParallel(), word => 
+            Parallel.ForEach(WordList, word => 
             {
                 lock (WordList)
                 {
-                    foreach (var wordFamily in _wordFamilies)
-                    {
-                        if (word.EndsWith(wordFamily))
-                        {
-                            WordFamilies[wordFamily].AddWord(word);
-                            break; //End loop beacause word can only belong to one word family.
-                        }
-                    }
+                    WordFamilies[GetWordFamily(word)].AddWord(word);
                 }
             });
         }
@@ -70,18 +101,12 @@ namespace AI
         //
         // Add word to Word-Family
         //
-        public void AddWord(string word)
-        {
-            Words.Add(word);
-        }
+        public void AddWord(string word) => Words.Add(word);
 
         //
         // Get words of a certain length from Word-Family
         //
-        public IEnumerable<string> GetWords(int length)
-        {
-            return Words.Where(x => x.Length == length);
-        }
+        public IEnumerable<string> GetWords(int length) => Words.Where(x => x.Length == length);
     }
 
 }
