@@ -8,23 +8,13 @@ namespace AI
 {
     class Program
     {
-        static Dictionary GameDictionary;
+        public static Dictionary GameDictionary;
+        private static GameEngine GameEngine;
 
         static void Main()
         {
             LoadGame();
-            for (int i = 0; i < 5; i++)
-            {
-                string special = GameDictionary.RandomWord();
-                Console.WriteLine($"Random Word: {special}");
-
-                foreach (var similarWord in GameDictionary.GetSimilarWords(special))
-                {
-                    Console.WriteLine(similarWord);
-                }
-            }
-            
-
+           
             /*
             Console.WriteLine($"Random Word: {GameDictionary.RandomWord()}");
             Console.WriteLine($"Random Word: {GameDictionary.RandomWord()}");
@@ -46,7 +36,11 @@ namespace AI
 
             Console.WriteLine("Game loading...");
             GameDictionary = new Dictionary();
+            GameEngine = new GameEngine();
             Console.Clear();
+
+            //Start AI game
+            GameEngine.StartGame();
         }
     }
 }

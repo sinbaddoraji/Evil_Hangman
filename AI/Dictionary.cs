@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Security.Cryptography.X509Certificates;
 
 namespace AI
 {
@@ -18,28 +17,51 @@ namespace AI
         // object for creating random integer values
         //
         private Random _randomizer = null;
-
-        //
-        // Return a random word from the Dictionary
-        //
-        public string RandomWord()
-        {
-            if (_randomizer == null) _randomizer = new Random();
-            return WordList[_randomizer.Next(0, WordList.Length)];
-        }
-
         //
         // Returns words in the same word-family of the same length
+        // (Starting with the closest matching values)
         //
         public IEnumerable<string> GetSimilarWords(string word)
         {
             var wordsOfSameLength = WordList.Where(x => x.Length == word.Length && x != word);
 
+            List<string> output = new List<string>();
             foreach (var slWord in wordsOfSameLength)
             {
                 double percentage = CalculateSimilarity(word, slWord) * 100;
-                if (percentage > 70) yield return slWord;
+                if (percentage > 70) output.Add(slWord);
             }
+
+            return output.OrderBy(x => CalculateSimilarity(x, word));
+        }
+
+        //
+        // Returns words in the same word-family of that has
+        // the letters guessed correctly by the user
+        //
+        public int GetPossibilities(int wordLength, List<char> guessedLetters)
+        {
+            return WordList.Where(x =>
+            {
+                bool equalLength = x.Length == wordLength;
+                bool hasGuessedLetters = false;
+
+                foreach (var letter in guessedLetters)
+                {
+                    hasGuessedLetters &= x.Contains(letter);
+                }
+                return equalLength & hasGuessedLetters;
+            }).Count();
+        }
+
+        //
+        // Return a random word of a certain length from the Dictionary
+        //
+        public string GetRandomWordOfLength(int wordLength)
+        {
+            if (_randomizer == null) _randomizer = new Random();
+            var words = WordList.Where(x => x.Length == wordLength).ToList();
+            return words[_randomizer.Next(0, words.Count())];
         }
 
         /// <summary>
@@ -58,6 +80,7 @@ namespace AI
             int stepsToSame = ComputeLevenshteinDistance(source, target);
             return (1.0 - ((double)stepsToSame / (double)Math.Max(source.Length, target.Length)));
         }
+
         /// <summary>
         /// Returns the number of steps required to transform the source string
         /// into the target string.
@@ -98,6 +121,7 @@ namespace AI
 
             return distance[sourceWordCount, targetWordCount];
         }
+
         //
         // Dictionary object for word guessing game
         //
