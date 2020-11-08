@@ -137,7 +137,7 @@ namespace AI
             else _correctLetters.Clear();
 
             //Ask the user questions till he/she runs out of chances
-            for (_guessesMade = 0; _guessesMade < _numberOfGuesses; _guessesMade++)
+            for (_guessesMade = 0; _guessesMade < _numberOfGuesses && wordMask.Contains("-"); _guessesMade++)
             {
                  wordMask = GetMaskedForm();
                 _wordFamily = Program.GameDictionary.GetWordFamily(wordMask, _secretWord).ToList();
@@ -145,6 +145,10 @@ namespace AI
                 PrintGameScreen();
             }
 
+            if(!wordMask.Contains("-"))
+            {
+                Console.WriteLine("You are correct!!");
+            }
             Console.WriteLine($"\n\nThe word was {_secretWord}");
             Console.ReadKey();
         }
