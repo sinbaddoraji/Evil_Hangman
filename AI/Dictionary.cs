@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 
 namespace AI
 {
@@ -17,23 +16,6 @@ namespace AI
         // object for creating random integer values
         //
         private Random _randomizer = null;
-        //
-        // Returns words in the same word-family of the same length
-        // (Starting with the closest matching values)
-        //
-        public IEnumerable<string> GetSimilarWords(string word)
-        {
-            var wordsOfSameLength = WordList.Where(x => x.Length == word.Length && x != word);
-
-            List<string> output = new List<string>();
-            foreach (var slWord in wordsOfSameLength)
-            {
-                double percentage = CalculateSimilarity(word, slWord) * 100;
-                if (percentage > 70) output.Add(slWord);
-            }
-
-            return output.OrderBy(x => CalculateSimilarity(x, word));
-        }
 
         //
         // Returns words in the same word-family of that has
@@ -45,26 +27,6 @@ namespace AI
             //Get all the words matching word mask
             return WordList.Where(x => x.Length == maskedWord.Length && x != secretWord  && MatchesMask(x, maskedWord))
                            .OrderBy(x => CalculateSimilarity(x, secretWord));
-        }
-
-        //Get words in word family that do not have repeating letters
-        public IEnumerable<string> GetWordFamily(string maskedWord, string secretWord, bool avoidDoubles)
-        {
-            if(avoidDoubles)
-            {
-                //Get all the words matching word mask
-                return WordList.Where(x => x.Length == maskedWord.Length && x != secretWord && MatchesMask(x, maskedWord) && !HasDoubleLetters(x))
-                               .OrderBy(x => CalculateSimilarity(x, secretWord));
-            }
-            else
-            {
-                return GetWordFamily(maskedWord, secretWord);
-            }
-        }
-
-        public bool HasDoubleLetters(string word)
-        {
-            return word.Length != word.Distinct().Count();
         }
 
         private bool MatchesMask(string word, string mask)
