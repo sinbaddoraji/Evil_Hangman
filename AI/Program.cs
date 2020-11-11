@@ -26,11 +26,20 @@ namespace AI
         {
             //Prompt the user with a game loading message
             //(This is a result of the large dictionary size)
+           
 
             Console.WriteLine("Game loading...");
             GameDictionary = new Dictionary();
             GameEngine = new GameEngine();
             Console.Clear();
+
+            Console.WriteLine("Mask Test: b---et");
+
+            foreach (var item in GameDictionary.GetWordFamily("b---et", "basket"))
+            {
+                Console.WriteLine(item);
+            }
+            Console.ReadKey();
 
             //Start AI game
             GameEngine.StartGame();
