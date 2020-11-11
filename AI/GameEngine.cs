@@ -218,6 +218,7 @@ namespace AI
             {
                 //If two consecutive guesses are correct
                 ChangeSecretWord();
+                correctEntries = 0; //Reset correct entries
             }
             else if(lastGuess == MostCommonLetter() && _wordFamily.Count > 0)
             {
