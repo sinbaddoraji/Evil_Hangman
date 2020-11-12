@@ -30,7 +30,7 @@ namespace AI
 
         private bool MatchesMask(string word, string mask)
         {
-            //Multi-tape turing machine
+            //Double-tape turing machine
             if (word.Length != mask.Length) throw new Exception("Word and Mask are not the same length");
 
             bool matchMask = true;

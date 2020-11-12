@@ -206,9 +206,8 @@ namespace AI
             //Change the secret word if two consecutive were correct
 
             double percentageOfGuesses = (double)_guessesMade / (double)_numberOfGuesses * 100;
-            double percentageOfCorrectLetters = (double)_correctLetters.Count / (double)_secretWord.Distinct().Count() * 100;
 
-            _changeRandomly = (bool)Convert.ToBoolean(random.Next(0, 2));
+            _changeRandomly = Convert.ToBoolean(random.Next(0, 2));
 
             if(_changeRandomly)
             {
@@ -230,6 +229,7 @@ namespace AI
                 ChangeSecretWord();
             }
 
+            
             //previousWordFamilyCount = _wordFamily.Count;
             //Console.Title = _secretWord;
         }

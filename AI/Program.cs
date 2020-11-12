@@ -19,38 +19,19 @@ namespace AI
         private static GameEngine GameEngine;
 
         //
-        // Load and Start Game
-        //(Initalize game objects)
+        //  Program Entry
         //
-        static void LoadGame()
+        static void Main()
         {
             //Prompt the user with a game loading message
             //(This is a result of the large dictionary size)
-           
-
             Console.WriteLine("Game loading...");
             GameDictionary = new Dictionary();
             GameEngine = new GameEngine();
             Console.Clear();
 
-            Console.WriteLine("Mask Test: b---et");
-
-            foreach (var item in GameDictionary.GetWordFamily("b---et", "basket"))
-            {
-                Console.WriteLine(item);
-            }
-            Console.ReadKey();
-
             //Start AI game
             GameEngine.StartGame();
-        }
-
-        //
-        //  Program Entry
-        //
-        static void Main()
-        {
-            LoadGame();
             GameEngine.Restart();
         }
     }
