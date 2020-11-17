@@ -228,10 +228,6 @@ namespace AI
             {
                 ChangeSecretWord();
             }
-
-            
-            //previousWordFamilyCount = _wordFamily.Count;
-            Console.Title = _secretWord;
         }
 
         //
