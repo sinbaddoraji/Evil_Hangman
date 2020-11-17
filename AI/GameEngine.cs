@@ -156,7 +156,7 @@ namespace AI
 
             if(!_wordMask.Contains("-"))
             {
-                Console.WriteLine("You are correct!!");
+                Console.WriteLine("\n\nYou are correct!!");
             }
             Console.WriteLine($"\n\nThe word was {_secretWord}");
             Console.ReadKey();
@@ -231,7 +231,7 @@ namespace AI
 
             
             //previousWordFamilyCount = _wordFamily.Count;
-            //Console.Title = _secretWord;
+            Console.Title = _secretWord;
         }
 
         //
@@ -340,7 +340,7 @@ namespace AI
         //
         private void PrintGameScreen()
         {
-            
+            if (!_wordMask.Contains("-")) return;   
             Console.Clear();
             Console.WriteLine("\n" + _wordMask + "\n");
             
