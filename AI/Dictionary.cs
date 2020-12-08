@@ -17,15 +17,30 @@ namespace AI
         //
         private Random _randomizer = null;
 
+        public bool DoesNotHaveWrongLetter(List<char> wrongletters, string word)
+        {
+            bool output = true;
+            foreach (var c in wrongletters)
+            {
+                output &= !word.Contains(c);
+            }
+
+            return output;
+        }
         //
         // Returns words in the same word-family of that has
         // the letters guessed correctly by the user based on how similar they are to the word
-        // (The lower the index, the less similar it is)
         //
-        public IEnumerable<string> GetWordFamily(string maskedWord, string secretWord)
+        public IEnumerable<string> GetSimilarWords(string maskedWord, string secretWord, List<char> wrongletters)
         {
             //Get all the words matching word mask
-            return WordList.Where(x => x.Length == maskedWord.Length && x != secretWord  && MatchesMask(x, maskedWord));
+            return WordList.Where(word => word.Length == maskedWord.Length && word != secretWord && MatchesMask(word, maskedWord) && DoesNotHaveWrongLetter(wrongletters, word));
+        }
+
+        public IEnumerable<string> GetWordsWithoutChar(char c, string maskedWord, int wordLen, List<char> wrongletters)
+        {
+            //Get all the words matching word mask
+            return WordList.Where(word => word.Length == wordLen && ! word.Contains(c) && MatchesMask(word, maskedWord) && DoesNotHaveWrongLetter(wrongletters, word));
         }
 
         private bool MatchesMask(string word, string mask)
@@ -36,7 +51,7 @@ namespace AI
             bool matchMask = true;
             for (int i = 0; i < mask.Length; i++)
             {
-                if(mask[i] != '-') matchMask &= mask[i] == word[i];
+                if (mask[i] != '-') matchMask &= mask[i] == word[i];
             }
 
             return matchMask;
