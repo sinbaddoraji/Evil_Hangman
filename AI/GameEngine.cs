@@ -58,11 +58,6 @@ namespace AI
         private static string _wordMask;
 
         //
-        // Object for generating random objects
-        //
-        private static readonly Random random = new Random();
-
-        //
         //List of words most similar to the secret word
         //(Arranged according to similarity to the secret word)
         //
@@ -105,9 +100,6 @@ namespace AI
             //Initalize or clear list containing attempted letters found in the word being guessed
             _correctLetters.Clear();
             correctLetterCount.Clear();
-
-            //Reset word possibility count
-            posCount = Dictionary.WordList.Count;
 
             //Ask the user questions till he/she runs out of chances
             for (_guessesMade = 0; _guessesMade < _numberOfGuesses && _wordMask.Contains("-"); _guessesMade++)
@@ -156,35 +148,18 @@ namespace AI
         //
         private static void RunRules()
         {
-           
             //The rules the AI uses to change values
             var newWordFamily = Dictionary.GetMinMaxFamily(_secretWord, _wordMask);
 
             if (newWordFamily == null) return;
             if(newWordFamily.Count() != 0)
             {
-                _wordFamily = newWordFamily.ToList();
                 _secretWord = Dictionary.MinMaxWord;
-                ChangeSecretWord();
+                _wordFamily = newWordFamily.ToList();
                 posCount = _wordFamily.Count;
             }
-            
-            Console.Title = (_secretWord);
-        }
 
-        //
-        // Change secret word to one of the possible alternatives
-        //
-        private static void ChangeSecretWord()
-        {
-            if (_wordFamily == null)
-                return;
-
-            int newIndex = random.Next(0, _wordFamily.Count);
-            if (newIndex == _wordFamily.Count) newIndex--;
-
-            if (_wordFamily.Count > 0)
-                _secretWord = _wordFamily[newIndex];
+            Console.Title = _secretWord;
         }
 
         //
@@ -219,9 +194,14 @@ namespace AI
             //Select a word of that specified length
             try
             {
+                //Select random secret word and generate wordMask
                 _secretWord = Dictionary.GetRandomWordOfLength(wordLength);
                 _wordMask = GetMaskedForm();
                 
+                //Initalize initial word family so min max algorithm has fewer words to deal with
+                _wordFamily = Dictionary.GetSimilarWords(_wordMask, _secretWord).ToList();
+                posCount = _wordFamily.Count;
+
                 //Word of specified length has been found
             }
             catch (Exception)
@@ -292,7 +272,7 @@ namespace AI
 
             if (_displayWordListLength)
             {
-                Console.WriteLine($"There are {posCount} words that match your guess");
+                Console.WriteLine($"There are {posCount} words in the word family");
             }
 
             char charInput = '/';

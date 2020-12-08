@@ -23,7 +23,6 @@ namespace AI
         //
         public static string MinMaxWord = "";
 
-
         //
         // Word does not contain characters asserted to not belong in the word being guessed
         // Also asserts if word has a higher count of correctly guessed letters
@@ -51,7 +50,7 @@ namespace AI
         //
         // Get all possible word families
         //
-        public static List<IEnumerable<string>> GetWordFamilies(string word, string mask)
+        public static IEnumerable<IEnumerable<string>> GetWordFamilies(string word, string mask)
         {
             //Use wordList as word family if word family is uninitalized
             var wordList = GameEngine._wordFamily;
@@ -82,9 +81,8 @@ namespace AI
                     }
                     output.Add(GetSimilarWords(newMask, word));
                 }
-                
             });
-            return output;
+            return output.OrderByDescending(x => x.Count());
         }
 
 
@@ -103,7 +101,7 @@ namespace AI
             if (wordFamilies.Count() == 0) return null;
 
             //Get word family with the largest count
-            var largestWordFamily = wordFamilies.OrderByDescending(x => x.Count()).First();
+            var largestWordFamily = wordFamilies.First();
             if (largestWordFamily.Count() == 0)
                 return null;
 
@@ -126,7 +124,6 @@ namespace AI
                         MinMaxWord = wrd;
                     }
                 }
-                
             });
             
 
@@ -149,17 +146,9 @@ namespace AI
             return wordList.Where(word => word.Length == maskedWord.Length && word != secretWord && MatchesMask(word, maskedWord) && DoesNotHaveWrongLetter(word));
         }
 
-        public static IEnumerable<string> GetWordsWithoutChar(char c, string maskedWord, int wordLen)
-        {
-            //Use wordList as word family if word family is uninitalized
-            var wordList = GameEngine._wordFamily;
-            if (wordList == null)
-                wordList = WordList;
-
-            //Get all the words matching word mask
-            return wordList.Where(word => word.Length == wordLen && ! word.Contains(c) && MatchesMask(word, maskedWord) && DoesNotHaveWrongLetter(word));
-        }
-
+        //
+        // Assert if word matches word mask
+        //
         private static bool MatchesMask(string word, string mask)
         {
             //Double-tape turing machine
