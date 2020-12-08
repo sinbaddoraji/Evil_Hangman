@@ -48,45 +48,9 @@ namespace AI
         private string _wordMask;
 
         //
-        // The last guess made by the user
-        //
-        private char lastGuess;
-
-        //
         // Object for generating random objects
         //
         private readonly Random random;
-
-        //
-        // Change secret word randomly
-        //
-        bool _changeRandomly;
-
-        //
-        // Number of consequtive correct guesses
-        //
-        int correctEntries;
-
-        //
-        // Most common letter in the word being searched for
-        //
-        char MostCommonLetter()
-        {
-            char output = '\0';
-            int maxOccurance = 0;
-
-            for (int i = 0; i < _secretWord.Length; i++)
-            {
-                int num = _secretWord.Count(x => x == _secretWord[i]);
-                if (num > maxOccurance)
-                {
-                    maxOccurance = num;
-                    output = _secretWord[i];
-                }
-            }
-
-            return output;
-        }
 
         //
         //List of words most similar to the secret word
@@ -140,6 +104,9 @@ namespace AI
             //Initalize or clear list containing attempted letters found in the word being guessed
             _correctLetters.Clear();
 
+            //Reset word possibility count
+            posCount = Program.GameDictionary.WordList.Length;
+
             //Ask the user questions till he/she runs out of chances
             for (_guessesMade = 0; _guessesMade < _numberOfGuesses && _wordMask.Contains("-"); _guessesMade++)
             {
@@ -188,22 +155,23 @@ namespace AI
         //
         private void RunRules()
         {
+            if(_wordFamily == null)
+            {
+                _wordFamily = Program.GameDictionary.WordList.ToList();
+            }
             //The rules the AI uses to change values
+            var newWordFamily = Program.GameDictionary.GetMinMaxFamily(_secretWord, _wordMask, _wrongLetters, _correctLetters, _wordFamily);
 
-            var wordsWithoutGuess = _wordFamily = Program.GameDictionary.GetWordsWithoutChar(lastGuess, _wordMask, _secretWord.Length, _wrongLetters).ToList();
-            var wordsWithinWordFamily = _wordFamily = Program.GameDictionary.GetSimilarWords(_wordMask, _secretWord, _wrongLetters).ToList();
-
-            if(wordsWithoutGuess.Count > wordsWithinWordFamily.Count)
+            if (newWordFamily == null) return;
+            if(newWordFamily.Count() != 0)
             {
-                _wordFamily = wordsWithinWordFamily;
+                _wordFamily = newWordFamily.ToList();
+                _secretWord = Program.GameDictionary.MinMaxWord;
+                ChangeSecretWord();
+                posCount = _wordFamily.Count;
             }
-            else
-            {
-                _wordFamily = wordsWithoutGuess;
-            }
-
-            ChangeSecretWord();
-            Console.Title = (_secretWord + $" {wordsWithoutGuess.Count} : {wordsWithinWordFamily.Count}");
+            
+            Console.Title = (_secretWord);
         }
 
         //
@@ -211,6 +179,9 @@ namespace AI
         //
         private void ChangeSecretWord()
         {
+            if (_wordFamily == null)
+                return;
+
             int newIndex = random.Next(0, _wordFamily.Count);
             if (newIndex == _wordFamily.Count) newIndex--;
 
@@ -267,6 +238,7 @@ namespace AI
                 //Prompt User for word length once more
                 GetWordFromDictionary(true);
             }
+
             RunRules();
         }
 
@@ -338,7 +310,6 @@ namespace AI
                 charInput = Console.ReadKey().KeyChar;
             }
 
-            lastGuess = charInput;
 
             if(_secretWord.Contains(charInput))
             {
@@ -356,7 +327,6 @@ namespace AI
                 //Correct guess
                 _correctLetters.Add(charInput);
                 _guessesMade--;
-                correctEntries++;
 
                 //Update number of possible alternatives
                 posCount = _wordFamily.Count() + 1;
@@ -364,7 +334,6 @@ namespace AI
             else
             {
                 _wrongLetters.Add(charInput);
-                correctEntries = 0;
             }
         }
     }
