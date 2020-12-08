@@ -158,8 +158,6 @@ namespace AI
                 _wordFamily = newWordFamily.ToList();
                 posCount = _wordFamily.Count;
             }
-
-            Console.Title = _secretWord;
         }
 
         //
