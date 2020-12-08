@@ -4,81 +4,82 @@ using System.Linq;
 
 namespace AI
 {
-    public class GameEngine
+    public static class GameEngine
     {
         //
         // If true the number of words left in the word list will be displayed
         //
-        private bool _displayWordListLength;
+        private static bool _displayWordListLength;
 
         //
         // The secret word the user is trying to guess
         //
-        private string _secretWord;
+        private static string _secretWord;
 
         //
         // The number of guesses made in the game
         //
-        private int _guessesMade;
+        private static int _guessesMade;
 
         //
         // The maximum number of guesses allowed in the game
         //
-        private int _numberOfGuesses;
+        private static int _numberOfGuesses;
 
         //
         // The number of guesses left in the game play
         //
-        private int GuessesLeft => _numberOfGuesses - _guessesMade;
+        private static int GuessesLeft => _numberOfGuesses - _guessesMade;
+
+        //
+        // Count of possibilities left for secret word
+        //
+        static int posCount = 1;
 
         //
         // List of the failed guess attempts
         //
-        public List<char> _wrongLetters = new List<char>();
+        public static List<char> _wrongLetters = new List<char>();
 
         //
         // List of the correct guess attempts
         //
-        public List<char> _correctLetters = new List<char>();
+        public static List<char> _correctLetters = new List<char>();
+
+        //
+        // Dictionary holding the count of every correctly guessed character
+        //
+        public static Dictionary<char, int> correctLetterCount = new Dictionary<char, int>();
 
         //
         // The word in it's previous masked form according to the correctly guessed letters
         // Example: -oo-
         //
-        private string _wordMask;
+        private static string _wordMask;
 
         //
         // Object for generating random objects
         //
-        private readonly Random random;
+        private static readonly Random random = new Random();
 
         //
         //List of words most similar to the secret word
         //(Arranged according to similarity to the secret word)
         //
-        private List<string> _wordFamily;
-
-        //
-        // The object holding the AI
-        // Also the object that handles game play
-        //
-        public GameEngine()
-        {
-            random = new Random();
-        }
+        public static List<string> _wordFamily;
 
         //
         // Masked Form of the secret Word
         // Example -oo-
         //
-        private string GetMaskedForm()
+        private static string GetMaskedForm()
             => new string(_secretWord.Select(x => _correctLetters.Contains(x) ? x : '-').ToArray());
 
         //
         // Masked Form of the secret Word
         // Example -oo-
         //
-        public void StartGame()
+        public static void StartGame()
         {
             //Clear Console
             Console.Clear();
@@ -103,9 +104,10 @@ namespace AI
 
             //Initalize or clear list containing attempted letters found in the word being guessed
             _correctLetters.Clear();
+            correctLetterCount.Clear();
 
             //Reset word possibility count
-            posCount = Program.GameDictionary.WordList.Count;
+            posCount = Dictionary.WordList.Count;
 
             //Ask the user questions till he/she runs out of chances
             for (_guessesMade = 0; _guessesMade < _numberOfGuesses && _wordMask.Contains("-"); _guessesMade++)
@@ -124,7 +126,7 @@ namespace AI
         //
         // Restart Game
         //
-        public void Restart()
+        public static void Restart()
         {
             Console.WriteLine("\nDo you wish to restart? ");
             Console.Write("Y/N ?");
@@ -149,20 +151,20 @@ namespace AI
             }
         }
 
-
         //
         // Run AI rules
         //
-        private void RunRules()
+        private static void RunRules()
         {
+           
             //The rules the AI uses to change values
-            var newWordFamily = Program.GameDictionary.GetMinMaxFamily(_secretWord, _wordMask, _wrongLetters, _correctLetters, _wordFamily);
+            var newWordFamily = Dictionary.GetMinMaxFamily(_secretWord, _wordMask);
 
             if (newWordFamily == null) return;
             if(newWordFamily.Count() != 0)
             {
                 _wordFamily = newWordFamily.ToList();
-                _secretWord = Program.GameDictionary.MinMaxWord;
+                _secretWord = Dictionary.MinMaxWord;
                 ChangeSecretWord();
                 posCount = _wordFamily.Count;
             }
@@ -173,7 +175,7 @@ namespace AI
         //
         // Change secret word to one of the possible alternatives
         //
-        private void ChangeSecretWord()
+        private static void ChangeSecretWord()
         {
             if (_wordFamily == null)
                 return;
@@ -185,7 +187,6 @@ namespace AI
                 _secretWord = _wordFamily[newIndex];
         }
 
-
         //
         // Get Secret word from Dictionary
         // (If askForWordLength then ask user for the length of the word)
@@ -193,7 +194,7 @@ namespace AI
         // A recurcive method that ensures that the user input is valid and 
         // the criteria given is met
         //
-        private void GetWordFromDictionary(bool askForWordLength)
+        private static void GetWordFromDictionary(bool askForWordLength)
         {
             bool properInput = false;
             int wordLength = -1;
@@ -218,7 +219,7 @@ namespace AI
             //Select a word of that specified length
             try
             {
-                _secretWord = Program.GameDictionary.GetRandomWordOfLength(wordLength);
+                _secretWord = Dictionary.GetRandomWordOfLength(wordLength);
                 _wordMask = GetMaskedForm();
                 
                 //Word of specified length has been found
@@ -234,14 +235,12 @@ namespace AI
                 //Prompt User for word length once more
                 GetWordFromDictionary(true);
             }
-
-            RunRules();
         }
 
         //
         // Get the number of guesses a user wishes to have
         //
-        private void GetGuessNumber()
+        private static void GetGuessNumber()
         {
             Console.WriteLine();
             Console.Write("How many guesses do you wish to have? ");
@@ -258,7 +257,7 @@ namespace AI
         //
         // Ask user if he/she wishes to know the number of possibilities the word can be
         //
-        private void PromptDisplayWordList()
+        private static void PromptDisplayWordList()
         {
             Console.Title = "Y or N?";
             Console.WriteLine("Do you wish to know the number of possibilites of the guessed word?");
@@ -277,11 +276,10 @@ namespace AI
             }
         }
 
-        int posCount = 1;
         //
         // Print game screen
         //
-        private void PrintGameScreen()
+        private static void PrintGameScreen()
         {
             if (!_wordMask.Contains("-")) return;
             Console.Clear();
@@ -309,8 +307,16 @@ namespace AI
 
             if(_secretWord.Contains(charInput))
             {
-                //Cheat if character is guessed correctly
-                RunRules();
+                if (_wordFamily != null && GuessesLeft == 1 && _wordFamily.Count == 2)
+                {
+                    _secretWord = _wordFamily.Where(x => x != _secretWord).First();
+                }
+                else
+                {
+                    //Cheat if character is guessed correctly
+                    RunRules();
+                }
+                
             }
             
 
@@ -320,6 +326,7 @@ namespace AI
             }
             else if (_secretWord.Contains(charInput))
             {
+                correctLetterCount.Add(charInput, _secretWord.Count(x => x == charInput));
                 //Correct guess
                 _correctLetters.Add(charInput);
                 _guessesMade--;
