@@ -105,7 +105,7 @@ namespace AI
             _correctLetters.Clear();
 
             //Reset word possibility count
-            posCount = Program.GameDictionary.WordList.Length;
+            posCount = Program.GameDictionary.WordList.Count;
 
             //Ask the user questions till he/she runs out of chances
             for (_guessesMade = 0; _guessesMade < _numberOfGuesses && _wordMask.Contains("-"); _guessesMade++)
@@ -155,10 +155,6 @@ namespace AI
         //
         private void RunRules()
         {
-            if(_wordFamily == null)
-            {
-                _wordFamily = Program.GameDictionary.WordList.ToList();
-            }
             //The rules the AI uses to change values
             var newWordFamily = Program.GameDictionary.GetMinMaxFamily(_secretWord, _wordMask, _wrongLetters, _correctLetters, _wordFamily);
 

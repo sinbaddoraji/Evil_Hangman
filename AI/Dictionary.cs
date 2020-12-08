@@ -11,7 +11,7 @@ namespace AI
         //
         // string array containing a list of words in the dictionary
         //
-        public string[] WordList;
+        public List<string> WordList;
 
         //
         // object for creating random integer values
@@ -38,10 +38,12 @@ namespace AI
         }
 
 
-        public List<IEnumerable<string>> GetWordFamilies(string word, string mask, List<char> wrongletters, List<string> wordList)
+        public List<IEnumerable<string>> GetWordFamilies(string word, string mask, List<char> wrongletters, List<string> wrdList)
         {
-            if (wordList == null)
-                wordList = WordList.ToList();
+            var wordList = wrdList;
+            if (wrdList == null)
+                wordList = WordList;
+
             if (mask.Trim() == "") return null;
             List<IEnumerable<string>> output = new List<IEnumerable<string>>();
 
@@ -52,7 +54,7 @@ namespace AI
                 if(mask[i] == '-')
                      unrevealed.Add(word[i]);
             }
-
+            
             //Generate all possible word masks
             List<string> possibleWordMasks = new List<string>();
             Parallel.ForEach(unrevealed, unrevealedLetter => 
@@ -84,8 +86,12 @@ namespace AI
 
         
 
-        public IEnumerable<string> GetMinMaxFamily(string word, string mask, List<char> wrongletters, List<char> correctLetters, List<string> wordList)
+        public IEnumerable<string> GetMinMaxFamily(string word, string mask, List<char> wrongletters, List<char> correctLetters, List<string> wrdList)
         {
+            var wordList = wrdList;
+            if (wrdList == null)
+                wordList = WordList;
+
             //Return word family based on Knuth's minmax algorithm
             var wordFamilies = GetWordFamilies(word, mask, wrongletters, wordList);
             if (wordFamilies.Count() == 0) return null;
@@ -123,14 +129,22 @@ namespace AI
         // Returns words in the same word-family of that has
         // the letters guessed correctly by the user based on how similar they are to the word
         //
-        public IEnumerable<string> GetSimilarWords(string maskedWord, string secretWord, List<char> wrongletters, List<string> wordList)
+        public IEnumerable<string> GetSimilarWords(string maskedWord, string secretWord, List<char> wrongletters, List<string> wrdList)
         {
+            var wordList = wrdList;
+            if (wrdList == null)
+                wordList = WordList;
+
             //Get all the words matching word mask
             return wordList.Where(word => word.Length == maskedWord.Length && word != secretWord && MatchesMask(word, maskedWord) && DoesNotHaveWrongLetter(wrongletters, word));
         }
 
-        public IEnumerable<string> GetWordsWithoutChar(char c, string maskedWord, int wordLen, List<char> wrongletters, List<string> wordList)
+        public IEnumerable<string> GetWordsWithoutChar(char c, string maskedWord, int wordLen, List<char> wrongletters, List<string> wrdList)
         {
+            var wordList = wrdList;
+            if (wrdList == null)
+                wordList = WordList;
+
             //Get all the words matching word mask
             return wordList.Where(word => word.Length == wordLen && ! word.Contains(c) && MatchesMask(word, maskedWord) && DoesNotHaveWrongLetter(wrongletters, word));
         }
@@ -165,7 +179,7 @@ namespace AI
         public Dictionary()
         {
             //Get list of words from word dictionary
-            WordList = File.ReadAllLines("dictionary.txt");
+            WordList = File.ReadAllLines("dictionary.txt").ToList();
         }
     }
 
